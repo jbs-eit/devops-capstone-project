@@ -14,9 +14,8 @@ from service.common import status  # HTTP Status Codes
 from service.models import db, Account, init_db
 from service.routes import app
 
-# DATABASE_URI = os.getenv(
-#    "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
-#) #original
+# DATABASE_URI = os.getenv("DATABASE_URI",
+# "postgresql://postgres:postgres@localhost:5432/postgres")
 DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///test.db")
 
 BASE_URL = "/accounts"
@@ -33,7 +32,7 @@ class TestAccountService(TestCase):
         """Run once before all tests"""
         app.config["TESTING"] = True
         app.config["DEBUG"] = False
-        app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False # new
+        app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False  # new
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
         app.logger.setLevel(logging.CRITICAL)
         init_db(app)
@@ -56,7 +55,6 @@ class TestAccountService(TestCase):
     ######################################################################
     #  H E L P E R   M E T H O D S
     ######################################################################
-
     def _create_accounts(self, count):
         """Factory method to create accounts in bulk"""
         accounts = []
@@ -76,7 +74,6 @@ class TestAccountService(TestCase):
     ######################################################################
     #  A C C O U N T   T E S T   C A S E S
     ######################################################################
-
     def test_index(self):
         """It should get 200_OK from the Home Page"""
         response = self.client.get("/")
@@ -124,7 +121,9 @@ class TestAccountService(TestCase):
             json=account.serialize(),
             content_type="test/html"
         )
-        self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+        self.assertEqual(
+            response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
+            )
 
     def test_not_found_handler(self):
         """It should return JSON for 404_NOT_FOUND errors"""
@@ -139,7 +138,9 @@ class TestAccountService(TestCase):
         """It should return JSON for 405_METHOD_NOT_ALLOWED errors"""
         # /accounts exists, but PUT is not allowed on that route
         response = self.client.put("/accounts", json={})
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(
+            response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED
+            )
 
         data = response.get_json()
         self.assertEqual(data["status"], status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -167,7 +168,9 @@ class TestAccountService(TestCase):
             # no "date_joined"
         }
         account.deserialize(data)
-        self.assertEqual(account.date_joined.isoformat(), date.today().isoformat())
+        self.assertEqual(
+            account.date_joined.isoformat(), date.today().isoformat()
+            )
 
     def test_read_an_account(self):
         """It should Read an existing Account"""
@@ -176,7 +179,7 @@ class TestAccountService(TestCase):
 
         # Read the account with its ID
         resp = self.client.get(
-            f"{BASE_URL}/{account.id}", 
+            f"{BASE_URL}/{account.id}",
             content_type="application/json"
         )
 
@@ -215,7 +218,9 @@ class TestAccountService(TestCase):
         # update the account
         new_account = resp.get_json()
         new_account["name"] = "Something Known"
-        resp = self.client.put(f"{BASE_URL}/{new_account['id']}", json=new_account)
+        resp = self.client.put(
+            f"{BASE_URL}/{new_account['id']}", json=new_account
+            )
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         updated_account = resp.get_json()
         self.assertEqual(updated_account["name"], "Something Known")
