@@ -5,7 +5,16 @@ import os
 
 
 # Get configuration from environment
-DATABASE_URI = os.getenv("DATABASE_URI")
+# DATABASE_URI = os.getenv("DATABASE_URI") # (original)
+# Default to SQLite for local development
+DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///dev.db")
+
+SQLALCHEMY_DATABASE_URI = DATABASE_URI
+SQLALCHEMY_TRACK_MODIFICATIONS = False# Default to SQLite for local development
+DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///dev.db")
+
+SQLALCHEMY_DATABASE_URI = DATABASE_URI
+SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # Build DATABASE_URI from environment if not found
 if not DATABASE_URI:

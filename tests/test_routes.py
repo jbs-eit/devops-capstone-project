@@ -8,14 +8,16 @@ Test cases can be run with the following:
 import os
 import logging
 from unittest import TestCase
+from datetime import date
 from tests.factories import AccountFactory
 from service.common import status  # HTTP Status Codes
 from service.models import db, Account, init_db
 from service.routes import app
 
-DATABASE_URI = os.getenv(
-    "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
-)
+# DATABASE_URI = os.getenv(
+#    "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
+#) #original
+DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///test.db")
 
 BASE_URL = "/accounts"
 
@@ -31,6 +33,7 @@ class TestAccountService(TestCase):
         """Run once before all tests"""
         app.config["TESTING"] = True
         app.config["DEBUG"] = False
+        app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False # new
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
         app.logger.setLevel(logging.CRITICAL)
         init_db(app)
@@ -123,4 +126,45 @@ class TestAccountService(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
-    # ADD YOUR TEST CASES HERE ...
+    def test_not_found_handler(self):
+        """It should return JSON for 404_NOT_FOUND errors"""
+        response = self.client.get("/does-not-exist")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        data = response.get_json()
+        self.assertEqual(data["status"], status.HTTP_404_NOT_FOUND)
+        self.assertEqual(data["error"], "Not Found")
+
+    def test_method_not_supported(self):
+        """It should return JSON for 405_METHOD_NOT_ALLOWED errors"""
+        # /accounts exists, but PUT is not allowed on that route
+        response = self.client.put("/accounts", json={})
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        data = response.get_json()
+        self.assertEqual(data["status"], status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(data["error"], "Method not Allowed")
+
+    def test_persistent_base_init_sets_id_none(self):
+        """It should set id to None when a new Account is created"""
+        account = Account()
+        self.assertIsNone(account.id)
+
+    def test_account_repr(self):
+        """It should return a string representation of an Account"""
+        account = Account()
+        account.id = 123
+        account.name = "Juan"
+        self.assertEqual(repr(account), "<Account Juan id=[123]>")
+
+    def test_deserialize_sets_date_joined_when_missing(self):
+        """It should set date_joined to today when not provided"""
+        account = Account()
+        data = {
+            "name": "Juan",
+            "email": "juan@example.com",
+            "address": "1 High St, Oxford",
+            # no "date_joined"
+        }
+        account.deserialize(data)
+        self.assertEqual(account.date_joined.isoformat(), date.today().isoformat())

@@ -9,10 +9,10 @@ from service import app
 from service.models import Account, DataValidationError, db
 from tests.factories import AccountFactory
 
-DATABASE_URI = os.getenv(
-    "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
-)
-
+# DATABASE_URI = os.getenv(
+#    "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
+#) #original
+DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///test.db")
 
 ######################################################################
 #  Account   M O D E L   T E S T   C A S E S
@@ -25,6 +25,7 @@ class TestAccount(unittest.TestCase):
         """This runs once before the entire test suite"""
         app.config["TESTING"] = True
         app.config["DEBUG"] = False
+        app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False # new
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
         app.logger.setLevel(logging.CRITICAL)
         Account.init_db(app)
