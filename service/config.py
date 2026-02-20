@@ -10,7 +10,7 @@ import os
 DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///dev.db")
 
 SQLALCHEMY_DATABASE_URI = DATABASE_URI
-SQLALCHEMY_TRACK_MODIFICATIONS = False# Default to SQLite for local development
+SQLALCHEMY_TRACK_MODIFICATIONS = False  # Default to SQLite for local development
 DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///dev.db")
 
 SQLALCHEMY_DATABASE_URI = DATABASE_URI
