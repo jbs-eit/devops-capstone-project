@@ -2,6 +2,8 @@
 
 devops-capstone-project
 
+![Build Status](https://github.com/jbs-eit/devops-capstone-project/actions/workflows/ci-build.yaml/badge.svg)
+
 REST API to track customers in e-commerce platform.
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
